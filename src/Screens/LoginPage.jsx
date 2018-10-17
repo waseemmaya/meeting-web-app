@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { App, Heading, Button, Box } from "grommet/components/..";
+import { Button, Box } from "grommet/components/..";
 import Login from "grommet/components/icons/base/Login";
 
 class LoginPage extends Component {
@@ -19,11 +19,15 @@ class LoginPage extends Component {
           primary={true}
           plain={true}
           type="submit"
-          onClick={this.props.login}
+          onClick={() => this.props.login(this.go)}
         />
       </Box>
     );
   }
+
+  go = () => {
+    this.props.history.push("/NickName1");
+  };
 }
 
 export default LoginPage;

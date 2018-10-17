@@ -1,16 +1,5 @@
 import React, { Component } from "react";
-import {
-  App,
-  Heading,
-  Button,
-  Box,
-  FormField,
-  TextInput,
-  Form,
-  Footer
-} from "grommet/components/..";
-import ImageUploader from "react-images-upload";
-import FileUploader from "react-firebase-file-uploader";
+import { Button, Box, Label } from "grommet/components/..";
 import Next from "grommet/components/icons/base/Next";
 
 class UploadImages2 extends Component {
@@ -32,16 +21,8 @@ class UploadImages2 extends Component {
           margin="small"
           colorIndex="light-1"
         >
-          <ImageUploader
-            onChange={this.props.image1}
-            singleImage={true}
-            withIcon={true}
-            withPreview={true}
-            buttonText="Upload Image 1"
-            // onChange={this.onDrop}
-            imgExtension={[".jpg", ".gif", ".png", ".gif"]}
-            maxFileSize={5242880}
-          />
+          <Label>Upload Image 1</Label>
+          <input type="file" onChange={this.props.image1} />
         </Box>
         <Box
           justify="start"
@@ -51,16 +32,8 @@ class UploadImages2 extends Component {
           margin="small"
           colorIndex="light-1"
         >
-          <ImageUploader
-            onChange={this.props.image2}
-            singleImage={true}
-            withIcon={true}
-            withPreview={true}
-            buttonText="Upload Image 2"
-            // onChange={this.onDrop}
-            imgExtension={[".jpg", ".gif", ".png"]}
-            maxFileSize={5242880}
-          />
+          <Label>Upload Image 2</Label>
+          <input type="file" onChange={this.props.image2} />
         </Box>
         <Box
           justify="start"
@@ -70,27 +43,23 @@ class UploadImages2 extends Component {
           margin="small"
           colorIndex="light-1"
         >
-          <ImageUploader
-            onChange={this.props.image3}
-            singleImage={true}
-            withIcon={true}
-            withPreview={true}
-            buttonText="Upload Image 3"
-            // onChange={this.onDrop}
-            imgExtension={[".jpg", ".gif", ".png", ".gif"]}
-            maxFileSize={5242880}
-          />
+          <Label>Upload Image 3</Label>
+          <input type="file" onChange={this.props.image3} />
         </Box>
 
         <Button
           icon={<Next />}
-          label="Next"
-          onClick={this.props.next2}
+          label="Next 2"
+          onClick={this.next2}
           primary={true}
         />
       </Box>
     );
   }
+
+  next2 = () => {
+    this.props.history.push("/SelectBeverages");
+  };
 }
 
 export default UploadImages2;
