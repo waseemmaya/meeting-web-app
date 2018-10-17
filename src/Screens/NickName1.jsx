@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import {
-  App,
   Heading,
   Button,
   Box,
@@ -22,7 +21,7 @@ class NickName1 extends Component {
         margin="small"
         colorIndex="light-1"
       >
-        <Heading>User Detail</Heading>
+        <Heading>Profile</Heading>
         <Form>
           <FormField label="Nick Name">
             <TextInput
@@ -43,8 +42,8 @@ class NickName1 extends Component {
           <Footer pad={{ vertical: "medium" }}>
             <Button
               icon={<Next />}
-              label="Next"
-              onClick={this.props.next1}
+              label="Next 1"
+              onClick={this.next1}
               primary={true}
               secondary={false}
               accent={false}
@@ -56,6 +55,10 @@ class NickName1 extends Component {
       </Box>
     );
   }
+
+  next1 = () => {
+    this.props.history.push("/UploadImages2");
+  };
 }
 
 export default NickName1;
