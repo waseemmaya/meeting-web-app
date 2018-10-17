@@ -2,12 +2,14 @@ import React, { Component } from "react";
 import LoginPage from "./Screens/LoginPage";
 import NickName1 from "./Screens/NickName1";
 import UploadImages2 from "./Screens/UploadImages2";
+import Map4 from "./Screens/Map4";
+
 import SelectBeverages from "./Screens/SelectBeverages3";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import swal from "sweetalert";
 import fire from "./config/fire";
 
-import { App, Heading,Box } from "grommet/components/..";
+import { App, Heading, Box } from "grommet/components/..";
 
 var provider = new fire.auth.FacebookAuthProvider();
 
@@ -21,7 +23,9 @@ class MainApp extends Component {
       imageNames: [],
       imglink1: "",
       imglink2: "",
-      imglink3: ""
+      imglink3: "",
+      beverages: [],
+      duration: []
     };
   }
   render() {
@@ -38,7 +42,7 @@ class MainApp extends Component {
               colorIndex="light-1"
             >
               <Heading>
-                <Link to="/">Main App</Link>
+                <Link to="/">Meeting App</Link>
               </Heading>
             </Box>
             <Route
@@ -72,17 +76,165 @@ class MainApp extends Component {
               render={props => (
                 <SelectBeverages
                   {...props}
-                  image1={this.image1}
-                  image2={this.image2}
-                  image3={this.image3}
+                  checkBox1={this.checkBox1}
+                  checkBox2={this.checkBox2}
+                  checkBox3={this.checkBox3}
+                  duration1={this.duration1}
+                  duration2={this.duration2}
+                  duration3={this.duration3}
                 />
               )}
+            />
+            <Route
+              path="/Map4"
+              render={props => <Map4 {...props} submit={this.submit} />}
             />
           </div>
         </Router>
       </App>
     );
   }
+
+  submit = () => {
+    const {
+      userID,
+      nickName,
+      phone,
+      imageNames,
+      imglink1,
+      imglink2,
+      imglink3,
+      beverages,
+      duration
+    } = this.state;
+    let dbRef = fire.database().ref("UsersProfile");
+    dbRef.push({
+      nickName,
+      userID,
+      phone,
+      imageNames,
+      imglink1,
+      imglink2,
+      imglink3,
+      beverages,
+      duration
+    });
+    swal("Posted");
+  };
+
+  checkBox1 = e => {
+    console.log(e.target.checked);
+
+    var { beverages } = this.state;
+    if (e.target.checked) {
+      beverages[0] = e.target.value;
+      this.setState({
+        beverages
+      });
+    }
+
+    if (!e.target.checked) {
+      delete beverages[0];
+      this.setState({
+        beverages
+      });
+    }
+  };
+
+  checkBox2 = e => {
+    console.log(e.target.checked);
+
+    var { beverages } = this.state;
+    if (e.target.checked) {
+      beverages[1] = e.target.value;
+      this.setState({
+        beverages
+      });
+    }
+
+    if (!e.target.checked) {
+      delete beverages[1];
+      this.setState({
+        beverages
+      });
+    }
+  };
+
+  checkBox3 = e => {
+    console.log(e.target.checked);
+
+    var { beverages } = this.state;
+    if (e.target.checked) {
+      beverages[2] = e.target.value;
+      this.setState({
+        beverages
+      });
+    }
+
+    if (!e.target.checked) {
+      delete beverages[2];
+      this.setState({
+        beverages
+      });
+    }
+  };
+
+  duration1 = e => {
+    console.log(e.target.checked);
+
+    var { duration } = this.state;
+    if (e.target.checked) {
+      duration[0] = e.target.value;
+      this.setState({
+        duration
+      });
+    }
+
+    if (!e.target.checked) {
+      delete duration[0];
+      this.setState({
+        duration
+      });
+    }
+  };
+
+  duration2 = e => {
+    console.log(e.target.checked);
+
+    var { duration } = this.state;
+    if (e.target.checked) {
+      duration[1] = e.target.value;
+      this.setState({
+        duration
+      });
+    }
+
+    if (!e.target.checked) {
+      delete duration[1];
+      this.setState({
+        duration
+      });
+    }
+  };
+
+  duration3 = e => {
+    console.log(e.target.checked);
+
+    var { duration } = this.state;
+    if (e.target.checked) {
+      duration[2] = e.target.value;
+      this.setState({
+        duration
+      });
+    }
+
+    if (!e.target.checked) {
+      delete duration[2];
+      this.setState({
+        duration
+      });
+    }
+  };
 
   login = go => {
     fire
