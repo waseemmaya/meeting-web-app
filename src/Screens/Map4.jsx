@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Button } from "grommet/components/..";
+// {withRouter}"react-router-dom"
 
 import {
   withScriptjs,
@@ -7,8 +8,16 @@ import {
   GoogleMap,
   Marker
 } from "react-google-maps";
+
 var lat = 0;
 var long = 0;
+const MyMapComponent = withScriptjs(
+  withGoogleMap(props => (
+    <GoogleMap defaultZoom={8} defaultCenter={{ lat: lat, lng: long }}>
+      {props.isMarkerShown && <Marker position={{ lat: lat, lng: long }} />}
+    </GoogleMap>
+  ))
+);
 
 class Map4 extends Component {
   constructor(props) {
@@ -19,6 +28,7 @@ class Map4 extends Component {
     };
   }
   render() {
+    // this.props.history.push("url");
     return (
       <div>
         <h1>Map</h1>
@@ -55,12 +65,6 @@ class Map4 extends Component {
     );
   }
 }
-const MyMapComponent = withScriptjs(
-  withGoogleMap(props => (
-    <GoogleMap defaultZoom={8} defaultCenter={{ lat: lat, lng: long }}>
-      {props.isMarkerShown && <Marker position={{ lat: lat, lng: long }} />}
-    </GoogleMap>
-  ))
-);
 
 export default Map4;
+// export default withRouter(Map4);

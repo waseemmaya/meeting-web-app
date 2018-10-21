@@ -3,13 +3,14 @@ import LoginPage from "./Screens/LoginPage";
 import NickName1 from "./Screens/NickName1";
 import UploadImages2 from "./Screens/UploadImages2";
 import Map4 from "./Screens/Map4";
+import Dashboard5 from "./Screens/Dashboard5";
 
 import SelectBeverages from "./Screens/SelectBeverages3";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import swal from "sweetalert";
 import fire from "./config/fire";
 
-import { App, Heading, Box } from "grommet/components/..";
+import { App, Heading, Box, Button } from "grommet/components/..";
 
 var provider = new fire.auth.FacebookAuthProvider();
 
@@ -44,6 +45,14 @@ class MainApp extends Component {
               <Heading>
                 <Link to="/">Meeting App</Link>
               </Heading>
+              <Button
+                label="Logout"
+                primary={true}
+                plain={false}
+                onClick={this.logout}
+              />
+              <br />
+              <Heading tag="h3">Powered By Grommet</Heading>
             </Box>
             <Route
               exact
@@ -89,6 +98,10 @@ class MainApp extends Component {
               path="/Map4"
               render={props => <Map4 {...props} submit={this.submit} />}
             />
+            <Route
+              path="/Dashboard5"
+              render={props => <Dashboard5 {...props} submit={this.submit} />}
+            />
           </div>
         </Router>
       </App>
@@ -107,8 +120,8 @@ class MainApp extends Component {
       beverages,
       duration
     } = this.state;
-    let dbRef = fire.database().ref("UsersProfile");
-    dbRef.push({
+    let dbRef = fire.database().ref(`UsersProfile/${userID}`);
+    dbRef.set({
       nickName,
       userID,
       phone,
@@ -236,18 +249,42 @@ class MainApp extends Component {
     }
   };
 
-  login = go => {
+  logout = () => {
+    fire
+      .auth()
+      .signOut()
+      .then(() => {
+        console.log("sign out");
+      })
+      .catch(function(error) {
+        // An error happened.
+      });
+  };
+
+  login = (go, goMore) => {
     fire
       .auth()
       .signInWithPopup(provider)
       .then(result => {
         var user = result.user;
-        console.log("user", user.uid);
-        swal("Logged in successfully");
-        this.setState({
-          userID: user.uid
+        let id = user.uid;
+        let userRef = fire.database().ref(`UsersProfile`);
+        userRef.on("child_added", snap => {
+          let key = snap.key;
+          let data = snap.val();
+          console.log("data", data);
+          console.log("key", key);
+
+          if (id === key) {
+            console.log("matched");
+            goMore();
+          } else {
+            this.setState({
+              userID: user.uid
+            });
+            go();
+          }
         });
-        go();
       })
       .catch(function(error) {});
   };

@@ -19,7 +19,7 @@ class LoginPage extends Component {
           primary={true}
           plain={true}
           type="submit"
-          onClick={() => this.props.login(this.go)}
+          onClick={() => this.props.login(this.go, this.goMore)}
         />
       </Box>
     );
@@ -27,6 +27,10 @@ class LoginPage extends Component {
 
   go = () => {
     this.props.history.push("/NickName1");
+  };
+
+  goMore = () => {
+    this.props.history.push("/Dashboard5");
   };
 }
 
