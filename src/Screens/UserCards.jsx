@@ -21,7 +21,7 @@ class UserCards extends Component {
                   <Image src={val.imglink2} />
                   <Image src={val.imglink3} />
                 </Carousel>
-                <GCard label={val.phone} heading={val.nickName} />
+                <GCard label={val.nickName} heading={val.phone} />
               </div>
             </Card>
           );
