@@ -1,8 +1,10 @@
 import React, { Component } from "react";
 import { Button, Box } from "grommet/components/..";
 import Login from "grommet/components/icons/base/Login";
+import fire from "../config/fire";
 
 class LoginPage extends Component {
+
   render() {
     return (
       <Box
@@ -25,12 +27,26 @@ class LoginPage extends Component {
     );
   }
 
+  componentDidMount() {
+    this.checkuser();
+  }
+
+  checkuser = () => {
+    fire.auth().onAuthStateChanged(user => {
+      if (user) {
+        this.props.history.replace("/AddMeeting");
+      } else {
+        this.props.history.replace("/");
+      }
+    });
+  };
+
   go = () => {
     this.props.history.push("/NickName1");
   };
 
   goMore = () => {
-    this.props.history.push("/Dashboard5");
+    this.props.history.push("/AddMeeting");
   };
 }
 

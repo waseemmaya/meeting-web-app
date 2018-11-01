@@ -4,13 +4,15 @@ import NickName1 from "./Screens/NickName1";
 import UploadImages2 from "./Screens/UploadImages2";
 import Map4 from "./Screens/Map4";
 import Dashboard5 from "./Screens/Dashboard5";
-
+import AddMeeting from "./Screens/AddMeeting";
+import Location from "./Screens/Location";
+import Button from "grommet/components/Button";
 import SelectBeverages from "./Screens/SelectBeverages3";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import swal from "sweetalert";
 import fire from "./config/fire";
 
-import { App, Heading, Box, Button } from "grommet/components/..";
+import { App, Heading, Box } from "grommet/components/..";
 
 var provider = new fire.auth.FacebookAuthProvider();
 
@@ -26,9 +28,11 @@ class MainApp extends Component {
       imglink2: "",
       imglink3: "",
       beverages: [],
-      duration: []
+      duration: [],
+      isAuth: false
     };
   }
+
   render() {
     return (
       <App>
@@ -45,14 +49,16 @@ class MainApp extends Component {
               <Heading>
                 <Link to="/">Meeting App</Link>
               </Heading>
-              <Button
-                label="Logout"
-                primary={true}
-                plain={false}
-                onClick={this.logout}
-              />
+              {this.state.isAuth && (
+                <Button
+                  label="Logout"
+                  primary={true}
+                  plain={false}
+                  onClick={this.logout}
+                />
+              )}
               <br />
-              <Heading tag="h3">Powered By Grommet</Heading>
+              {/* <Heading tag="h3">Powered By Grommet</Heading> */}
             </Box>
             <Route
               exact
@@ -102,6 +108,11 @@ class MainApp extends Component {
               path="/Dashboard5"
               render={props => <Dashboard5 {...props} submit={this.submit} />}
             />
+            <Route
+              path="/AddMeeting"
+              render={props => <AddMeeting {...props} />}
+            />
+            <Route path="/Location" render={props => <Location {...props} />} />
           </div>
         </Router>
       </App>
@@ -256,9 +267,7 @@ class MainApp extends Component {
       .then(() => {
         console.log("sign out");
       })
-      .catch(function(error) {
-        // An error happened.
-      });
+      .catch(error => {});
   };
 
   login = (go, goMore) => {
@@ -271,12 +280,7 @@ class MainApp extends Component {
         let userRef = fire.database().ref(`UsersProfile`);
         userRef.on("child_added", snap => {
           let key = snap.key;
-          let data = snap.val();
-          console.log("data", data);
-          console.log("key", key);
-
           if (id === key) {
-            console.log("matched");
             goMore();
           } else {
             this.setState({
@@ -380,6 +384,24 @@ class MainApp extends Component {
         });
       }
     );
+  };
+
+  componentDidMount() {
+    this.isAUth();
+  }
+
+  isAUth = () => {
+    fire.auth().onAuthStateChanged(user => {
+      if (user) {
+        this.setState({
+          isAuth: true
+        });
+      } else {
+        this.setState({
+          isAuth: false
+        });
+      }
+    });
   };
 
   handleNickName = e => {

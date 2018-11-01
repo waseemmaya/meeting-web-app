@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import fire from "../config/fire";
 import UserCards from "./UserCards";
-import Heading from "grommet/components/Heading";
+import swal from "sweetalert";
 
 class Dashboard5 extends Component {
   constructor(props) {
@@ -16,7 +16,6 @@ class Dashboard5 extends Component {
     const { data, loaded } = this.state;
     return (
       <div>
-        <Heading>Dashboard</Heading>
         {loaded && (
           <UserCards
             data={data}
@@ -29,8 +28,24 @@ class Dashboard5 extends Component {
     );
   }
 
-  swipeRight = () => {
+  swipeRight = id => {
     console.log("Right");
+    swal("").then(val => {});
+
+    swal({
+      title: "Are you sure?",
+      text: "Do you want to meet with this Person.",
+      icon: "success",
+      buttons: true,
+      dangerMode: false
+    }).then(willDelete => {
+      if (willDelete) {
+        localStorage.setItem("key", id);
+        this.props.history.push("/Location");
+      } else {
+        // swal("Your imaginary file is safe!");
+      }
+    });
   };
   swipeLeft = () => {
     console.log("Left");
