@@ -1,19 +1,20 @@
-import React, { Component } from "react";
+import React from "react";
 import { Button, Box, Heading, CheckBox } from "grommet/components/..";
 import Next from "grommet/components/icons/base/Next";
 
-class SelectBeverages extends Component {
-  render() {
-    return (
-      <Box
-        justify="center"
-        align="center"
-        wrap={true}
-        pad="small"
-        margin="none"
-        colorIndex="light-1"
-      >
+const Beverages = props => {
+  return (
+    <Box
+      justify="center"
+      align="center"
+      wrap={true}
+      pad="small"
+      margin="none"
+      colorIndex="light-1"
+    >
+      <div>
         <Heading tag="h3">* Select Beverages</Heading>
+
         <Box
           justify="start"
           align="center"
@@ -39,8 +40,8 @@ class SelectBeverages extends Component {
               label={<Heading tag="h4">Coffee</Heading>}
               toggle={false}
               disabled={false}
+              onChange={props.handleBeverages}
               value="Coffee"
-              onChange={this.props.checkBox1}
               reverse={true}
             />
           </span>
@@ -69,9 +70,9 @@ class SelectBeverages extends Component {
             <CheckBox
               label={<Heading tag="h4">Juice</Heading>}
               toggle={false}
+              onChange={props.handleBeverages}
               disabled={false}
               value="Juice"
-              onChange={this.props.checkBox2}
               reverse={true}
             />
           </span>
@@ -100,13 +101,16 @@ class SelectBeverages extends Component {
             <CheckBox
               label={<Heading tag="h4">Cocktail</Heading>}
               toggle={false}
+              onChange={props.handleBeverages}
               disabled={false}
               value="Cocktail"
-              onChange={this.props.checkBox3}
               reverse={true}
             />
           </span>
         </Box>
+      </div>
+      <br />
+      <div>
         <br />
         <Heading tag="h3">* Select Duration</Heading>
 
@@ -121,9 +125,9 @@ class SelectBeverages extends Component {
           <CheckBox
             label="20 minutes"
             toggle={false}
+            onChange={props.handleDuration}
             disabled={false}
             value="20 minutes"
-            onChange={this.props.duration1}
             reverse={true}
           />
         </Box>
@@ -137,9 +141,9 @@ class SelectBeverages extends Component {
         >
           <CheckBox
             label="60 minutes"
+            onChange={props.handleDuration}
             toggle={false}
             value="60 minutes"
-            onChange={this.props.duration2}
             disabled={false}
             reverse={true}
           />
@@ -155,25 +159,22 @@ class SelectBeverages extends Component {
           <CheckBox
             label="120 minutes"
             toggle={false}
+            onChange={props.handleDuration}
             disabled={false}
             value="120 minutes"
-            onChange={this.props.duration3}
             reverse={true}
           />
         </Box>
-        <Button
-          icon={<Next />}
-          label="Next 3"
-          onClick={this.next3}
-          primary={true}
-        />
-      </Box>
-    );
-  }
+      </div>
+      <Button
+        icon={<Next />}
+        label="Next"
+        href="#"
+        onClick={props.beveragesNext}
+        primary={true}
+      />
+    </Box>
+  );
+};
 
-  next3 = () => {
-    this.props.history.push("/Map4");
-  };
-}
-
-export default SelectBeverages;
+export default Beverages;

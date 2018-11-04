@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import MainApp from "./MainApp";
-import 'grommet-css/build/index.min.css';
+import "grommet-css/build/index.min.css";
+import Routes from "./Routes";
 
-ReactDOM.render(<MainApp />, document.getElementById("root"));
+ReactDOM.render(<Routes />, document.getElementById("root"));

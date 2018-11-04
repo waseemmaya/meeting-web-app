@@ -1,13 +1,14 @@
 import React, { Component } from "react";
 import { Button, List, ListItem, Search, Box } from "grommet";
+import fire from "../../MeetApp/config/fire";
 
-import fire from "../config/fire";
-
-class Location extends Component {
+class NearByLocations extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      arr: null,
+      myLat: "",
+      myLong: "",
+      arr: [],
       loaded: false,
       beveragesArr: null,
       nearBy: null,
@@ -17,6 +18,7 @@ class Location extends Component {
   }
   render() {
     const { loaded, showSearch } = this.state;
+    console.log("state", this.state);
 
     return (
       <div>
@@ -25,6 +27,18 @@ class Location extends Component {
           {showSearch && this.renderSearch()}
           {loaded && (
             <div>
+              <div>
+                <Box
+                  justify="center"
+                  align="center"
+                  wrap={true}
+                  pad="small"
+                  margin="none"
+                  colorIndex="light-1"
+                >
+                  <h2>Nearby Locations</h2>
+                </Box>
+              </div>
               <List>
                 {this.state.nearBy.map((val, i) => {
                   return (
@@ -42,8 +56,6 @@ class Location extends Component {
                             onClick={() =>
                               this.handleLocation(
                                 val.venue.name,
-                                val.venue.location.address,
-                                val.venue.location.crossStreet,
                                 val.venue.location.lat,
                                 val.venue.location.lng
                               )
@@ -65,7 +77,11 @@ class Location extends Component {
   renderSearch = () => {
     return (
       <div>
-        <h1>Searching</h1>
+        {this.state.searchResult.length > 0 ? (
+          <h1>Search Results</h1>
+        ) : (
+          <h1>No Result Found</h1>
+        )}
         <div>
           <List>
             {this.state.searchResult.map((val, i) => {
@@ -84,8 +100,6 @@ class Location extends Component {
                         onClick={() =>
                           this.handleLocation(
                             val.venue.name,
-                            val.venue.location.address,
-                            val.venue.location.crossStreet,
                             val.venue.location.lat,
                             val.venue.location.lng
                           )
@@ -102,7 +116,22 @@ class Location extends Component {
     );
   };
 
-  handleLocation = (name, location, crossStreet, lat, long) => {};
+  handleLocation = (name, lat, long) => {
+    let myId = this.props.location.state.id;
+
+    console.log(name, lat, long);
+    this.props.history.push({
+      pathname: "/DateDirection",
+      state: {
+        id: myId,
+        name: name,
+        lat: lat,
+        long: long,
+        myLat : this.state.myLat,
+        myLong : this.state.myLong
+      }
+    });
+  };
 
   SearchUI = () => {
     return (
@@ -134,10 +163,9 @@ class Location extends Component {
   fourSquare = () => {
     let client_id = "ES4PK425E5FW4JM5MKTCWBHL31XGER1LM5MMTOIQ3OQHW30F";
     let client_secret = "3HSB3BMHL3FMOFB4BKNA4JA4JU3JO44WH5NMB5FBVM50S31L";
-
     let url = `https://api.foursquare.com/v2/venues/explore?client_id=${client_id}&client_secret=${client_secret}&v=20180323&limit=5&ll=${
-      this.state.arr[0].lat
-    },${this.state.arr[0].long}&query=${this.state.beveragesArr[1]}`;
+      this.state.myLat
+    },${this.state.myLong}&query=${this.state.beveragesArr[0]}`;
 
     fetch(url)
       .then(res => {
@@ -155,19 +183,24 @@ class Location extends Component {
   };
 
   getData = () => {
-    let myId = localStorage.getItem("key");
+    var { myLat, myLong } = this.state;
+    let hisUID = this.props.location.state.id;
 
-    let myCordRef = fire.database().ref(`UsersProfile/${myId}`);
+    let myCordRef = fire.database().ref(`Users/${hisUID}`);
     myCordRef
       .once("value")
       .then(snap => {
-        const arr = [];
+        myLat = snap.val().lat;
+        myLong = snap.val().long;
+        const { arr } = this.state;
         arr.push({
           id: snap.key,
           ...snap.val()
         });
+
         this.setState({
-          arr
+          myLat,
+          myLong
         });
       })
       .then(v => {
@@ -187,10 +220,6 @@ class Location extends Component {
       });
   };
 
-  renderLocation() {
-    return <div />;
-  }
-
   handeleSearch = e => {
     if (e.target.value.length === 0) {
       this.setState({
@@ -207,8 +236,8 @@ class Location extends Component {
     let client_secret = "3HSB3BMHL3FMOFB4BKNA4JA4JU3JO44WH5NMB5FBVM50S31L";
 
     let url = `https://api.foursquare.com/v2/venues/explore?client_id=${client_id}&client_secret=${client_secret}&v=20180323&limit=5&ll=${
-      this.state.arr[0].lat
-    },${this.state.arr[0].long}&query=${e.target.value}`;
+      this.state.myLat
+    },${this.state.myLong}&query=${e.target.value}`;
 
     fetch(url)
       .then(res => {
@@ -225,4 +254,4 @@ class Location extends Component {
   };
 }
 
-export default Location;
+export default NearByLocations;
