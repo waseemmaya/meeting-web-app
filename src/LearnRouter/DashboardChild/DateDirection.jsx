@@ -4,7 +4,7 @@ import React, { Component } from "react";
 import Box from "grommet/components/Box";
 import Location from "grommet/components/icons/base/Location";
 
-import { Form, FormField, DateTime, Button } from "grommet";
+import { Form, FormField, DateTime, Button, Value, Tip } from "grommet";
 import {
   withGoogleMap,
   GoogleMap,
@@ -12,6 +12,7 @@ import {
   DirectionsRenderer,
   withScriptjs
 } from "react-google-maps";
+const { InfoBox } = require("react-google-maps/lib/components/addons/InfoBox");
 
 class DateDirection extends Component {
   constructor(props) {
@@ -19,6 +20,8 @@ class DateDirection extends Component {
     this.state = {
       coords: {},
       date: "",
+      beforeMarker: true,
+      distance: "",
       showDate: true,
       isMarkerShown: true,
       myLat: this.props.location.state.myLat,
@@ -84,12 +87,12 @@ class DateDirection extends Component {
       myLat,
       myLong,
       targetLat,
+      beforeMarker,
+      targetLong,
       isMarkerShown,
-      targetLong
+      distance
     } = this.state;
-    console.log("directions", directions);
 
-    // const { lat, long } = this.state;
     return (
       <div>
         <Box
@@ -102,13 +105,15 @@ class DateDirection extends Component {
         />
         <div>
           <MyMapComponent
+            distance={distance}
             myLat={myLat}
             myLong={myLong}
             targetLat={targetLat}
             targetLong={targetLong}
+            beforeMarker={beforeMarker}
             isMarkerShown={isMarkerShown}
             coords={coords}
-            googleMapURL="https://maps.googleapis.com/maps/api/js?key=AIzaSyAzPdGNQeiKpaODVoQy6tjjzypqVXKNzWU&v=3.exp&libraries=geometry,drawing,places"
+            googleMapURL="https://maps.googleapis.com/maps/api/js?libraries=geometry&sensor=false&key=AIzaSyAv82eqKbZOaEU4RyRYOFBs0Tz7tlOEM4Y"
             loadingElement={<div style={{ height: `100%` }} />}
             containerElement={<div style={{ height: `600px` }} />}
             mapElement={<div style={{ height: `100%` }} />}
@@ -122,10 +127,10 @@ class DateDirection extends Component {
             onClick={this.getDirections}
             primary={true}
           />
-            <br />
-          <br />  <br />
-          <br />  <br />
-          <br />  <br />
+          <br />
+          <br /> <br />
+          <br /> <br />
+          <br /> <br />
           <br />
         </div>
       </div>
@@ -150,13 +155,29 @@ class DateDirection extends Component {
 
           this.setState({
             directions: result,
-            isMarkerShown: false
+            beforeMarker: false
           });
         } else {
-          alert("Sorry! Can't calculate directions!");
+          console.log("Sorry! Can't calculate directions!");
         }
       }
     );
+
+    var p1 = new google.maps.LatLng(this.state.myLat, this.state.myLong);
+    var p2 = new google.maps.LatLng(
+      this.state.targetLat,
+      this.state.targetLong
+    );
+
+    //calculates distance between two points in km's
+    let distance = (
+      google.maps.geometry.spherical.computeDistanceBetween(p1, p2) / 1000
+    ).toFixed(2);
+    console.log("distance===>", distance);
+
+    this.setState({
+      distance
+    });
   }
 
   componentDidMount() {
@@ -164,24 +185,45 @@ class DateDirection extends Component {
   }
 
   setPosition() {
-    navigator.geolocation.getCurrentPosition(position => {
-      this.setState({ coords: position.coords });
-    });
-  }
-
-  updateCoords({ latitude, longitude }) {
-    this.setState({ coords: { latitude, longitude } });
+    let Coordinates = {
+      latitude: this.state.targetLat,
+      longitude: this.state.targetLong
+    };
+    this.setState({ coords: Coordinates });
   }
 }
 
 const MyMapComponent = withScriptjs(
   withGoogleMap(props => (
     <GoogleMap
-      defaultZoom={14}
-      center={{ lat: props.myLat, lng: props.myLong }}
+      defaultZoom={13}
+      center={{ lat: props.targetLat, lng: props.targetLong }}
     >
-      <Marker position={{ lat: props.myLat, lng: props.myLong }} />
-      <Marker position={{ lat: props.targetLat, lng: props.targetLong }} />
+      {props.distance && (
+        <InfoBox
+          defaultPosition={
+            new google.maps.LatLng(props.targetLat, props.targetLong)
+          }
+          options={{ closeBoxURL: ``, enableEventPropagation: true }}
+        >
+          <div
+            style={{
+              backgroundColor: `#00cceb`,
+              opacity: 0.8,
+              padding: `8px`
+            }}
+          >
+            <Value value={props.distance} units="KM" />
+          </div>
+        </InfoBox>
+      )}
+
+      {props.beforeMarker && (
+        <React.Fragment>
+          <Marker position={{ lat: props.myLat, lng: props.myLong }} />
+          <Marker position={{ lat: props.targetLat, lng: props.targetLong }} />
+        </React.Fragment>
+      )}
 
       {props.directions && <DirectionsRenderer directions={props.directions} />}
     </GoogleMap>

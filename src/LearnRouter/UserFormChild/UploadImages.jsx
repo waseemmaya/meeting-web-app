@@ -52,8 +52,12 @@ const UploadImages = props => {
 
           {props.uploading ? (
             <div>
-              <Spinning size="xlarge" />
-              <h1>Uploading.....</h1>
+              <div>
+                <Spinning size="xlarge" />
+              </div>
+              <div>
+                <h1>Uploading.....</h1>
+              </div>
             </div>
           ) : (
             <Button

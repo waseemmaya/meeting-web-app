@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { App } from "grommet";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import Nav from "./LearnRouter/Nav";
-import Login from "./LearnRouter/Login";
+import Home from "./LearnRouter/Home";
 import UserForm from "./LearnRouter/UserForm";
 import Dashboard from "./LearnRouter/Dashboard";
 import fire from "./MeetApp/config/fire";
@@ -19,21 +19,24 @@ class Routes extends Component {
     this.state = {
       isSave: true,
       isAuth: false,
-      userID: ""
+      userID: "",
+      myData: []
     };
   }
   render() {
-    const { isAuth, isSave } = this.state;
+    const { isAuth, isSave, myData } = this.state;
+    // console.log('***====****',myData);
+
     return (
       <BrowserRouter>
         <App>
-          <Nav isSave={isSave} logout={this.logout} isAuth={isAuth} />
+          <Nav name={myData.nickName} isSave={isSave} login={this.login} logout={this.logout} isAuth={isAuth} />
           <Switch>
             <Route
               path="/"
               exact
               render={props => (
-                <Login
+                <Home
                   isAuth={isAuth}
                   logout={this.logout}
                   {...props}
@@ -43,30 +46,61 @@ class Routes extends Component {
             />
             {isAuth && (
               <Switch>
-                {/* User agar save nhi hai to ye chalega  */}
                 {!isSave && (
                   <Switch>
                     <Route
                       path="/UserForm"
                       exact
                       render={props => (
-                        <UserForm changeStatus={this.changeStatus} {...props} />
+                        <UserForm
+                          userID={this.state.userID}
+                          changeStatus={this.changeStatus}
+                          {...props}
+                        />
                       )}
                     />
 
                     <Route component={PageNotFound} />
                   </Switch>
                 )}
-                {/* User agar save nhi hai to ye chalega  */}
 
                 <Route path="/Dashboard" component={Dashboard} exact />
-                <Route path="/UserCards" component={UserCards} exact />
+
+                <Route
+                  path="/UserCards"
+                  exact
+                  render={props => (
+                    <UserCards
+                      myData={myData}
+                      userID={this.state.userID}
+                      {...props}
+                    />
+                  )}
+                />
+
                 <Route
                   path="/NearByLocations"
-                  component={NearByLocations}
                   exact
+                  render={props => (
+                    <NearByLocations
+                      myData={myData}
+                      userID={this.state.userID}
+                      {...props}
+                    />
+                  )}
                 />
-                <Route path="/DateDirection" component={DateDirection} exact />
+
+                <Route
+                  path="/DateDirection"
+                  exact
+                  render={props => (
+                    <DateDirection
+                      myData={myData}
+                      userID={this.state.userID}
+                      {...props}
+                    />
+                  )}
+                />
 
                 <Route component={LoggedInButNotRegister} />
               </Switch>
@@ -88,6 +122,15 @@ class Routes extends Component {
     this.checkUserStatus();
   }
 
+  getMyData = () => {
+    let myRef = fire.database().ref(`Users/${this.state.userID}`);
+    myRef.once("value", snap => {
+      this.setState({
+        myData: snap.val()
+      });
+    });
+  };
+
   logout = () => {
     fire
       .auth()
@@ -95,7 +138,8 @@ class Routes extends Component {
       .then(() => {
         console.log("sign out");
         this.setState({
-          isAuth: false
+          isAuth: false,
+          myData : []
         });
       })
       .catch(error => {});
@@ -112,24 +156,21 @@ class Routes extends Component {
           userID,
           isAuth: true
         });
-        let userRef = fire.database().ref(`Users`);
-        userRef.once("value", snap => {
-          if (snap.val() === null) {
+        var ref = fire.database().ref(`Users/${userID}`);
+        ref.once("value").then(snapshot => {
+          var alreadyExist = snapshot.exists();
+          if (alreadyExist) {
+            console.log("***alreadyExist***", alreadyExist);
+
+            this.setState({
+              isSave: true
+            });
+            this.getMyData();
+          } else {
+            console.log("***alreadyExist***", alreadyExist);
             this.setState({
               isSave: false
             });
-          }
-
-          for (const myKey in snap.val()) {
-            if (myKey === userID) {
-              this.setState({
-                isSave: true
-              });
-            } else {
-              this.setState({
-                isSave: false
-              });
-            }
           }
         });
       })
@@ -143,37 +184,27 @@ class Routes extends Component {
           userID: user.uid,
           isAuth: true
         });
-        console.log("Already Logged in ===> ***");
 
-        let userRef = fire.database().ref(`Users`);
-        userRef.once("value", snap => {
-          if (snap.val() === null) {
-            console.log("Null ===> ***");
+        console.log("Already Logged in ===> ***");
+        var ref = fire.database().ref(`Users/${user.uid}`);
+        ref.once("value").then(snapshot => {
+          var alreadyExist = snapshot.exists();
+          if (alreadyExist) {
+            this.getMyData();
+            console.log("***alreadyExist***", alreadyExist);
+            this.setState({
+              isSave: true
+            });
+          } else {
+            console.log("***notExist***", alreadyExist);
 
             this.setState({
               isSave: false
             });
-          } else {
-            for (const myKey in snap.val()) {
-              if (myKey === user.uid) {
-                console.log("User Matched ===> ***");
-
-                this.setState({
-                  isSave: true
-                });
-              } else {
-                console.log("User Not Matched ===> ***");
-
-                this.setState({
-                  isSave: false
-                });
-              }
-            }
           }
         });
       } else {
         console.log("Not Logged in ===> ***");
-
         this.setState({
           isAuth: false
         });

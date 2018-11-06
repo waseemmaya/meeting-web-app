@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import { Box, Button } from "grommet/components/..";
+import Location from "grommet/components/icons/base/Location";
+import Pulse from "grommet/components/icons/Pulse";
 import {
   withScriptjs,
   withGoogleMap,
@@ -34,7 +36,7 @@ class Map extends Component {
           {coords && (
             <MyMapComponent
               isMarkerShown
-              googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places"
+              googleMapURL="https://maps.googleapis.com/maps/api/js?libraries=geometry&sensor=false&key=AIzaSyAv82eqKbZOaEU4RyRYOFBs0Tz7tlOEM4Y"
               loadingElement={<div style={{ height: `100%` }} />}
               containerElement={<div style={{ height: `100vh` }} />}
               mapElement={<div style={{ height: `100%` }} />}
@@ -51,6 +53,9 @@ class Map extends Component {
           margin="small"
           colorIndex="light-1"
         >
+          <p>Get Current Location</p>
+          <Pulse icon={<Location />} onClick={() => this.setPosition()} />
+          <br />
           <Button
             label="Submit"
             primary={true}

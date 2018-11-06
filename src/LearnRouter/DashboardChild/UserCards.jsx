@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Cards, { Card } from "react-swipe-deck";
 import GCard from "grommet/components/Card";
+import Image from "grommet/components/Image";
 import Carousel from "grommet/components/Carousel";
 import Box from "grommet/components/Box";
 import fire from "../../MeetApp/config/fire";
@@ -25,47 +26,36 @@ class UserCards extends Component {
     );
   }
 
-  componentDidMount() {
-    this.getUsers();
-  }
-
-  getUsers = () => {
-    const { userArr } = this.state;
-    let dbRef = fire.database().ref("Users");
-    dbRef.on("value", snap => {
-      snap.forEach(val => {
-        userArr.push({ id: val.key, ...val.val() });
-        this.setState({
-          userArr
-        });
-      });
-    });
-  };
-
   renderCards = () => {
+    const { userArr } = this.state;
     return (
       <Box justify="start" align="center" colorIndex="light-1">
         <Cards
           size={[600, 600]}
-          cardSize={[500, 500]}
+          cardSize={[550, 550]}
           className="master-root"
           onEnd={this.onEnd}
         >
-          {this.state.userArr.map((val, i) => {
+          {userArr.map((val, i) => {
             return (
               <Card
-                key={i + val.id}
+                key={i + val.userID}
                 onSwipeLeft={() => this.swipeLeft()}
                 onSwipeRight={() =>
-                  this.swipeRight(val.nickName, val.id, val.lat, val.long)
+                  this.swipeRight(
+                    val.nickName,
+                    val.userID,
+                    val.lat,
+                    val.long,
+                    val
+                  )
                 }
               >
                 <Box
                   justify="start"
                   align="center"
-                  wrap={true}
                   pad="medium"
-                  margin="small"
+                  margin="medium"
                   colorIndex="light-1"
                 >
                   <div style={{ backgroundColor: "white" }}>
@@ -73,9 +63,30 @@ class UserCards extends Component {
                       {i + 1} Out of {this.state.userArr.length}
                     </h1>
                     <Carousel>
-                      <img alt="pic1" height="300" src={val.imgLinks[0]} />
-                      <img alt="pic2" height="300" src={val.imgLinks[1]} />
-                      <img alt="pic3" height="300" src={val.imgLinks[2]} />
+                      <img
+                        alt="pic1"
+                        style={{
+                          width: 400,
+                          height: 300
+                        }}
+                        src={val.imgLinks[0]}
+                      />
+                      <img
+                        alt="pic2"
+                        style={{
+                          width: 400,
+                          height: 300
+                        }}
+                        src={val.imgLinks[1]}
+                      />
+                      <img
+                        alt="pic3"
+                        style={{
+                          width: 400,
+                          height: 300
+                        }}
+                        src={val.imgLinks[2]}
+                      />
                     </Carousel>
                     <GCard label={val.nickName} heading={val.phone} />
                   </div>
@@ -94,6 +105,42 @@ class UserCards extends Component {
     );
   };
 
+  getUsers = () => {
+    const { userArr } = this.state;
+
+    let dbRef = fire.database().ref("Users");
+    dbRef.on("value", snap => {
+      snap.forEach(val => {
+        if (val.val().userID !== this.props.userID) {
+          // let hisBeverages = val.val().beverages;
+          // let hisDuration = val.val().duration;
+
+          // let userLocation = [user.location.latitude, user.location.longitude];
+          // let distance = geofire.distance(myLocation, userLocation).toFixed(3);
+
+          // let isBeveragesMatch = this.props.myData.beverages.some(val =>
+          //   hisBeverages.includes(val)
+          // );
+
+          // let isDurationMatch = this.props.myData.duration.some(val =>
+          //   hisDuration.includes(val)
+          // );
+
+          userArr.push({ ...val.val() });
+          this.setState({
+            userArr
+          });
+          // if (isBeveragesMatch && isDurationMatch) {
+          // }
+        }
+      });
+    });
+  };
+
+  componentDidMount() {
+    this.getUsers();
+  }
+
   onEnd = () => {
     this.props.history.push("/Dashboard");
     console.log("ended");
@@ -103,7 +150,7 @@ class UserCards extends Component {
     console.log("left");
   };
 
-  swipeRight = (name, id, lat, long) => {
+  swipeRight = (name, id, lat, long, val) => {
     fire.auth().onAuthStateChanged(user => {
       if (user) {
         localStorage.setItem("myUID", user.uid);
@@ -122,6 +169,7 @@ class UserCards extends Component {
         this.props.history.push({
           pathname: "/NearByLocations",
           state: {
+            hisOBJ: val,
             name: name,
             id: id,
             lat: lat,

@@ -5,6 +5,7 @@ import Beverages from "./UserFormChild/Beverages";
 import UploadImages from "./UserFormChild/UploadImages";
 import Map from "./UserFormChild/Map";
 import fire from "../MeetApp/config/fire";
+import swal from "sweetalert";
 
 class UserForm extends Component {
   constructor(props) {
@@ -16,6 +17,8 @@ class UserForm extends Component {
       isMap: false,
       beverages: [],
       duration: [],
+      nickName: "",
+      phone: "",
       imgArr: [],
       coords: [],
       imageNames: [],
@@ -71,70 +74,72 @@ class UserForm extends Component {
       beverages,
       duration
     } = this.state;
-    fire.auth().onAuthStateChanged(user => {
-      if (user) {
-        let userID = user.uid;
-        let dbRef = fire.database().ref(`Users/${userID}`);
-        dbRef.set({
-          nickName,
-          userID,
-          phone,
-          lat,
-          long,
-          imageNames,
-          imgLinks,
-          beverages,
-          duration
-        });
-        this.props.changeStatus();
-        this.props.history.replace("/Dashboard");
-      } else {
-        console.log("error");
-      }
-    });
+    if (this.props.userID) {
+      let userID = this.props.userID;
+      let dbRef = fire.database().ref(`Users/${userID}`);
+      dbRef.set({
+        nickName,
+        userID,
+        phone,
+        lat,
+        long,
+        imageNames,
+        imgLinks,
+        beverages,
+        duration
+      });
+      this.props.changeStatus();
+      this.props.history.replace("/Dashboard");
+    } else {
+      console.log("error");
+    }
   };
 
   uploadImages = () => {
-    this.setState({
-      uploading: true
-    });
-    this.state.imgArr.map((val, i) => {
-      var { imageNames, userID, imgLinks } = this.state;
-      var filename = Math.floor(100444234000 + Math.random() * 9032012000);
-      imageNames.push(filename);
+    if (this.state.imgArr.length === 3) {
+      this.setState({
+        uploading: true
+      });
+      this.state.imgArr.map((val, i) => {
+        var { imageNames, userID, imgLinks } = this.state;
+        var filename = Math.floor(100444234000 + Math.random() * 9032012000);
+        imageNames.push(filename);
 
-      var metadata = {
-        contentType: val.type
-      };
-      var storageRef = fire.storage().ref();
-      var uploadTask = storageRef
-        .child(`Pics/${userID}/${filename}`)
-        .put(val, metadata);
-      uploadTask.on(
-        "state_changed",
-        function(snapshot) {
-          var progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log("Upload is " + progress + "% done");
-        },
-        function(error) {},
-        () => {
-          uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
-            console.log("File available at", downloadURL);
-            imgLinks.push(downloadURL);
-            if (i === 2) {
-              this.setState({
-                isNickName: false,
-                isBeverages: false,
-                isUploadImages: false,
-                isMap: true
-              });
-            }
-          });
-        }
-      );
-      return true;
-    });
+        var metadata = {
+          contentType: val.type
+        };
+        var storageRef = fire.storage().ref();
+        var uploadTask = storageRef
+          .child(`Pics/${userID}/${filename}`)
+          .put(val, metadata);
+        uploadTask.on(
+          "state_changed",
+          function(snapshot) {
+            var progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log("Upload is " + progress + "% done");
+          },
+          function(error) {},
+          () => {
+            uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
+              console.log("File available at", downloadURL);
+              imgLinks.push(downloadURL);
+              if (i === 2) {
+                this.setState({
+                  isNickName: false,
+                  isBeverages: false,
+                  isUploadImages: false,
+                  isMap: true
+                });
+              }
+            });
+          }
+        );
+        return true;
+      });
+    } else {
+      swal("Select All 3 Images");
+    }
   };
 
   handleImages = e => {
@@ -179,18 +184,26 @@ class UserForm extends Component {
   };
 
   nickNext = () => {
-    this.setState({
-      isNickName: false,
-      isBeverages: true
-    });
+    if (this.state.nickName.length > 3 && this.state.phone.length > 4) {
+      this.setState({
+        isNickName: false,
+        isBeverages: true
+      });
+    } else {
+      swal("Fill out form");
+    }
   };
 
   beveragesNext = () => {
-    this.setState({
-      isNickName: false,
-      isBeverages: false,
-      isUploadImages: true
-    });
+    if (this.state.beverages.length > 0 && this.state.duration.length > 0) {
+      this.setState({
+        isNickName: false,
+        isBeverages: false,
+        isUploadImages: true
+      });
+    } else {
+      swal("Check out neccessary out form");
+    }
   };
 }
 

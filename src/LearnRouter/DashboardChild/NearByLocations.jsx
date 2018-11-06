@@ -18,7 +18,7 @@ class NearByLocations extends Component {
   }
   render() {
     const { loaded, showSearch } = this.state;
-    console.log("state", this.state);
+    console.log("hisOBJ", this.props.location.state.hisOBJ);
 
     return (
       <div>
@@ -127,8 +127,8 @@ class NearByLocations extends Component {
         name: name,
         lat: lat,
         long: long,
-        myLat : this.state.myLat,
-        myLong : this.state.myLong
+        myLat: this.state.myLat,
+        myLong: this.state.myLong
       }
     });
   };
