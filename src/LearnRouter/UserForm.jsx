@@ -74,12 +74,14 @@ class UserForm extends Component {
       beverages,
       duration
     } = this.state;
-    if (this.props.userID) {
+    if (this.props.userID && this.props.userPic) {
       let userID = this.props.userID;
+      let userPic = this.props.userPic;
       let dbRef = fire.database().ref(`Users/${userID}`);
       dbRef.set({
         nickName,
         userID,
+        userPic,
         phone,
         lat,
         long,

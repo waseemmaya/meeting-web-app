@@ -4,14 +4,11 @@ import { Heading, Box, Tiles, Tile } from "grommet";
 import { Header, Title, Menu, Anchor } from "grommet/components/..";
 import Actions from "grommet/components/icons/base/Actions";
 import Status from "grommet/components/icons/Status";
-import SocialShare from "grommet/components/SocialShare";
 import Dashboard from "grommet/components/icons/base/Dashboard";
 import UserSettings from "grommet/components/icons/base/UserSettings";
 import Home from "grommet/components/icons/base/Home";
 
 const Nav = props => {
-  console.log("NavProps", props);
-
   return (
     <div>
       <Header fixed={false} size="medium" splash={false}>
@@ -68,7 +65,13 @@ const Nav = props => {
             margin="small"
           >
             <Anchor
-              icon={<SocialShare type="facebook" />}
+              icon={
+                <img
+                  src="https://image.flaticon.com/icons/svg/124/124010.svg"
+                  alt="facebook"
+                  style={{ width: 48, height: 48, marginRight: 10 }}
+                />
+              }
               label="Login with Facebook"
               onClick={props.login}
               href="#"
@@ -97,22 +100,17 @@ const Nav = props => {
             <React.Fragment>
               <Tile align="center" basis="1/4">
                 <Link to="/">
-                  <Anchor
-                    icon={<Home />}
-                    label="Home"
-                    href="#"
-                    primary={true}
-                  />
+                  <Heading tag="h2">
+                    {" "}
+                    <Home /> Home
+                  </Heading>
                 </Link>
               </Tile>
               <Tile align="center" basis="1/4">
                 <Link to="/Dashboard">
-                  <Anchor
-                    icon={<Dashboard />}
-                    label="Dashboard"
-                    href="#"
-                    primary={true}
-                  />
+                  <Heading tag="h2">
+                    <Dashboard /> Dashboard
+                  </Heading>
                 </Link>
               </Tile>
             </React.Fragment>

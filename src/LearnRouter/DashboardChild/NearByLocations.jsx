@@ -1,24 +1,21 @@
 import React, { Component } from "react";
 import { Button, List, ListItem, Search, Box } from "grommet";
-import fire from "../../MeetApp/config/fire";
 
 class NearByLocations extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      myLat: "",
-      myLong: "",
-      arr: [],
       loaded: false,
-      beveragesArr: null,
       nearBy: null,
       searchResult: [],
-      showSearch: false
+      showSearch: false,
+      hisOBJ: this.props.location.state.hisOBJ,
+      myOBJ: this.props.location.state.myOBJ
     };
   }
   render() {
-    const { loaded, showSearch } = this.state;
-    console.log("hisOBJ", this.props.location.state.hisOBJ);
+    const { loaded, showSearch, hisOBJ } = this.state;
+    console.log("hahahaha", hisOBJ);
 
     return (
       <div>
@@ -116,19 +113,21 @@ class NearByLocations extends Component {
     );
   };
 
-  handleLocation = (name, lat, long) => {
-    let myId = this.props.location.state.id;
+  handleLocation = (venue, lat, long) => {
+    const { hisOBJ, myOBJ } = this.state;
 
-    console.log(name, lat, long);
+    let venueOBJ = {
+      venue: venue,
+      lat: lat,
+      long: long
+    };
+
     this.props.history.push({
       pathname: "/DateDirection",
       state: {
-        id: myId,
-        name: name,
-        lat: lat,
-        long: long,
-        myLat: this.state.myLat,
-        myLong: this.state.myLong
+        hisOBJ: hisOBJ,
+        myOBJ: myOBJ,
+        venueOBJ: venueOBJ
       }
     });
   };
@@ -157,15 +156,17 @@ class NearByLocations extends Component {
   };
 
   componentDidMount() {
-    this.getData();
+    this.fourSquare();
   }
 
   fourSquare = () => {
+    const { hisOBJ } = this.state;
+
     let client_id = "ES4PK425E5FW4JM5MKTCWBHL31XGER1LM5MMTOIQ3OQHW30F";
     let client_secret = "3HSB3BMHL3FMOFB4BKNA4JA4JU3JO44WH5NMB5FBVM50S31L";
     let url = `https://api.foursquare.com/v2/venues/explore?client_id=${client_id}&client_secret=${client_secret}&v=20180323&limit=5&ll=${
-      this.state.myLat
-    },${this.state.myLong}&query=${this.state.beveragesArr[0]}`;
+      hisOBJ.lat
+    },${hisOBJ.long}&query=${hisOBJ.beverages[0]}`;
 
     fetch(url)
       .then(res => {
@@ -182,45 +183,9 @@ class NearByLocations extends Component {
       });
   };
 
-  getData = () => {
-    var { myLat, myLong } = this.state;
-    let hisUID = this.props.location.state.id;
-
-    let myCordRef = fire.database().ref(`Users/${hisUID}`);
-    myCordRef
-      .once("value")
-      .then(snap => {
-        myLat = snap.val().lat;
-        myLong = snap.val().long;
-        const { arr } = this.state;
-        arr.push({
-          id: snap.key,
-          ...snap.val()
-        });
-
-        this.setState({
-          myLat,
-          myLong
-        });
-      })
-      .then(v => {
-        const { beverages } = this.state.arr[0];
-
-        let beveragesArr = [];
-
-        beverages.map(val => {
-          return beveragesArr.push(val);
-        });
-
-        this.setState({
-          beveragesArr
-        });
-
-        this.fourSquare();
-      });
-  };
-
   handeleSearch = e => {
+    const { hisOBJ } = this.state;
+
     if (e.target.value.length === 0) {
       this.setState({
         loaded: true,
@@ -236,8 +201,8 @@ class NearByLocations extends Component {
     let client_secret = "3HSB3BMHL3FMOFB4BKNA4JA4JU3JO44WH5NMB5FBVM50S31L";
 
     let url = `https://api.foursquare.com/v2/venues/explore?client_id=${client_id}&client_secret=${client_secret}&v=20180323&limit=5&ll=${
-      this.state.myLat
-    },${this.state.myLong}&query=${e.target.value}`;
+      hisOBJ.lat
+    },${hisOBJ.long}&query=${e.target.value}`;
 
     fetch(url)
       .then(res => {

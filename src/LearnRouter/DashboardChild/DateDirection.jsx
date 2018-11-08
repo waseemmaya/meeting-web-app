@@ -3,8 +3,11 @@
 import React, { Component } from "react";
 import Box from "grommet/components/Box";
 import Location from "grommet/components/icons/base/Location";
+import Add from "grommet/components/icons/base/Add";
+import Pulse from "grommet/components/icons/Pulse";
+import fire from "../../MeetApp/config/fire";
 
-import { Form, FormField, DateTime, Button, Value, Tip } from "grommet";
+import { Form, FormField, DateTime, Button, Value, Timestamp } from "grommet";
 import {
   withGoogleMap,
   GoogleMap,
@@ -18,18 +21,17 @@ class DateDirection extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      coords: {},
       date: "",
-      beforeMarker: true,
+      coords: {},
+      hisOBJ: this.props.location.state.hisOBJ,
+      myOBJ: this.props.location.state.myOBJ,
+      venueOBJ: this.props.location.state.venueOBJ,
       distance: "",
       showDate: true,
       isMarkerShown: true,
-      myLat: this.props.location.state.myLat,
-      myLong: this.props.location.state.myLong,
-      targetLat: this.props.location.state.lat,
-      targetLong: this.props.location.state.long
+      beforeMarker: true,
+      isSubmitEnable: false
     };
-    this.getDirections = this.getDirections.bind(this);
   }
   render() {
     return (
@@ -37,7 +39,8 @@ class DateDirection extends Component {
         <div>
           <Box justify="start" align="center" colorIndex="light-1">
             {/* <h1>Date</h1> */}
-            <p>{this.state.date}</p>
+            {/* <p>{this.state.date}</p> */}
+            {this.state.date.length > 1 && <Timestamp value={this.state.date} fields={['date', 'time', 'seconds']} />}
           </Box>
         </div>
         {this.state.showDate && this.renderDate()}
@@ -45,6 +48,54 @@ class DateDirection extends Component {
       </div>
     );
   }
+
+  addMeeting = () => {
+    const { hisOBJ, myOBJ, venueOBJ, distance, date } = this.state;
+    var randNo = Math.floor(100444000 + Math.random() * 90012000);
+    let meetingID = randNo;
+
+    let meetingOBJForMe = {
+      meetingID,
+      hisOBJ,
+      myOBJ,
+      venueOBJ,
+      distance,
+      date,
+      status: "Pending",
+      isMet: false,
+      isCancel: false,
+      isAccepted: false
+    };
+
+    let meetingOBJForHim = {
+      meetingID,
+      hisOBJ: myOBJ,
+      myOBJ: hisOBJ,
+      venueOBJ,
+      distance,
+      date,
+      status: "Pending",
+      isMet: false,
+      isCancel: false,
+      isAccepted: false
+    };
+
+    let myMeetingRef = fire
+      .database()
+      .ref(`AllMeetings/${myOBJ.userID}/IRequestToHim/${meetingID}`);
+
+    let hisMeetingRef = fire
+      .database()
+      .ref(`AllMeetings/${hisOBJ.userID}/HeRequestToMe/${meetingID}`);
+
+    hisMeetingRef.set(meetingOBJForHim).then(() => {
+      console.log("in his node");
+      myMeetingRef.set(meetingOBJForMe).then(() => {
+        console.log("in my node");
+        this.props.history.push("/Dashboard");
+      });
+    });
+  };
 
   renderDate = () => {
     return (
@@ -82,80 +133,85 @@ class DateDirection extends Component {
 
   renderDirection = () => {
     const {
+      venueOBJ,
+      hisOBJ,
       coords,
       directions,
-      myLat,
-      myLong,
-      targetLat,
       beforeMarker,
-      targetLong,
       isMarkerShown,
       distance
     } = this.state;
 
     return (
       <div>
-        <Box
-          justify="start"
-          align="center"
-          wrap={true}
-          pad="medium"
-          margin="small"
-          colorIndex="light-1"
-        />
         <div>
           <MyMapComponent
-            distance={distance}
-            myLat={myLat}
-            myLong={myLong}
-            targetLat={targetLat}
-            targetLong={targetLong}
+            coords={coords}
+            venueLat={venueOBJ.lat}
+            venueLong={venueOBJ.long}
+            hisLat={hisOBJ.lat}
+            hisLong={hisOBJ.long}
             beforeMarker={beforeMarker}
             isMarkerShown={isMarkerShown}
-            coords={coords}
+            distance={distance}
             googleMapURL="https://maps.googleapis.com/maps/api/js?libraries=geometry&sensor=false&key=AIzaSyAv82eqKbZOaEU4RyRYOFBs0Tz7tlOEM4Y"
             loadingElement={<div style={{ height: `100%` }} />}
             containerElement={<div style={{ height: `600px` }} />}
             mapElement={<div style={{ height: `100%` }} />}
             directions={directions}
           />
-          <br />
-          <br />
-          <Button
-            icon={<Location />}
-            label="Get Directions"
-            onClick={this.getDirections}
-            primary={true}
-          />
-          <br />
-          <br /> <br />
-          <br /> <br />
-          <br /> <br />
-          <br />
         </div>
+
+        <Box
+          justify="start"
+          align="center"
+          wrap={true}
+          pad="small"
+          margin="small"
+          colorIndex="light-1"
+        >
+          <h2>Get Direction Routes</h2>
+
+          <Pulse onClick={this.getDirections} icon={<Location />} />
+        </Box>
+
+        <Box
+          justify="start"
+          align="center"
+          wrap={true}
+          pad="small"
+          margin="small"
+          colorIndex="light-1"
+        >
+          {this.state.isSubmitEnable && (
+            <Button
+              icon={<Add />}
+              label="Add Meeting"
+              onClick={this.addMeeting}
+              primary={true}
+            />
+          )}
+        </Box>
       </div>
     );
   };
 
-  getDirections() {
+  getDirections = () => {
+    const { venueOBJ, hisOBJ } = this.state;
     const DirectionsService = new google.maps.DirectionsService();
-
     DirectionsService.route(
       {
-        origin: new google.maps.LatLng(this.state.myLat, this.state.myLong),
-        destination: new google.maps.LatLng(
-          this.state.targetLat,
-          this.state.targetLong
-        ),
+        origin: new google.maps.LatLng(hisOBJ.lat, hisOBJ.long),
+        destination: new google.maps.LatLng(venueOBJ.lat, venueOBJ.long),
         travelMode: google.maps.TravelMode.DRIVING
       },
       (result, status) => {
         if (status === google.maps.DirectionsStatus.OK) {
           console.log("result", result);
-
           this.setState({
             directions: result,
-            beforeMarker: false
+            beforeMarker: false,
+            isSubmitEnable: true
           });
         } else {
           console.log("Sorry! Can't calculate directions!");
@@ -163,31 +219,27 @@ class DateDirection extends Component {
       }
     );
 
-    var p1 = new google.maps.LatLng(this.state.myLat, this.state.myLong);
-    var p2 = new google.maps.LatLng(
-      this.state.targetLat,
-      this.state.targetLong
-    );
+    var p1 = new google.maps.LatLng(hisOBJ.lat, hisOBJ.long);
+    var p2 = new google.maps.LatLng(venueOBJ.lat, venueOBJ.long);
 
     //calculates distance between two points in km's
     let distance = (
       google.maps.geometry.spherical.computeDistanceBetween(p1, p2) / 1000
     ).toFixed(2);
-    console.log("distance===>", distance);
-
     this.setState({
       distance
     });
-  }
+  };
 
   componentDidMount() {
-    this.setPosition();
+    this.setVenue();
   }
 
-  setPosition() {
+  setVenue() {
+    const { venueOBJ } = this.state;
     let Coordinates = {
-      latitude: this.state.targetLat,
-      longitude: this.state.targetLong
+      latitude: venueOBJ.lat,
+      longitude: venueOBJ.long
     };
     this.setState({ coords: Coordinates });
   }
@@ -197,12 +249,12 @@ const MyMapComponent = withScriptjs(
   withGoogleMap(props => (
     <GoogleMap
       defaultZoom={13}
-      center={{ lat: props.targetLat, lng: props.targetLong }}
+      center={{ lat: props.venueLat, lng: props.venueLong }}
     >
       {props.distance && (
         <InfoBox
           defaultPosition={
-            new google.maps.LatLng(props.targetLat, props.targetLong)
+            new google.maps.LatLng(props.venueLat, props.venueLong)
           }
           options={{ closeBoxURL: ``, enableEventPropagation: true }}
         >
@@ -220,8 +272,8 @@ const MyMapComponent = withScriptjs(
 
       {props.beforeMarker && (
         <React.Fragment>
-          <Marker position={{ lat: props.myLat, lng: props.myLong }} />
-          <Marker position={{ lat: props.targetLat, lng: props.targetLong }} />
+          <Marker position={{ lat: props.venueLat, lng: props.venueLong }} />
+          <Marker position={{ lat: props.hisLat, lng: props.hisLong }} />
         </React.Fragment>
       )}
 

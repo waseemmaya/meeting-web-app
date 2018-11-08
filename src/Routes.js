@@ -20,17 +20,24 @@ class Routes extends Component {
       isSave: true,
       isAuth: false,
       userID: "",
+      userPic: "",
       myData: []
     };
   }
   render() {
     const { isAuth, isSave, myData } = this.state;
-    // console.log('***====****',myData);
+    // console.log("***====****", myData);
 
     return (
       <BrowserRouter>
         <App>
-          <Nav name={myData.nickName} isSave={isSave} login={this.login} logout={this.logout} isAuth={isAuth} />
+          <Nav
+            name={myData.nickName}
+            isSave={isSave}
+            login={this.login}
+            logout={this.logout}
+            isAuth={isAuth}
+          />
           <Switch>
             <Route
               path="/"
@@ -54,6 +61,7 @@ class Routes extends Component {
                       render={props => (
                         <UserForm
                           userID={this.state.userID}
+                          userPic={this.state.userPic}
                           changeStatus={this.changeStatus}
                           {...props}
                         />
@@ -64,7 +72,13 @@ class Routes extends Component {
                   </Switch>
                 )}
 
-                <Route path="/Dashboard" component={Dashboard} exact />
+                <Route
+                  path="/Dashboard"
+                  exact
+                  render={props => (
+                    <Dashboard userID={this.state.userID} {...props} />
+                  )}
+                />
 
                 <Route
                   path="/UserCards"
@@ -136,10 +150,10 @@ class Routes extends Component {
       .auth()
       .signOut()
       .then(() => {
-        console.log("sign out");
+        // console.log("sign out");
         this.setState({
           isAuth: false,
-          myData : []
+          myData: []
         });
       })
       .catch(error => {});
@@ -153,6 +167,7 @@ class Routes extends Component {
       .then(result => {
         let userID = result.user.uid;
         this.setState({
+          userPic: result.user.photoURL,
           userID,
           isAuth: true
         });
@@ -160,14 +175,14 @@ class Routes extends Component {
         ref.once("value").then(snapshot => {
           var alreadyExist = snapshot.exists();
           if (alreadyExist) {
-            console.log("***alreadyExist***", alreadyExist);
+            // console.log("***alreadyExist***", alreadyExist);
 
             this.setState({
               isSave: true
             });
             this.getMyData();
           } else {
-            console.log("***alreadyExist***", alreadyExist);
+            // console.log("***alreadyExist***", alreadyExist);
             this.setState({
               isSave: false
             });
@@ -180,23 +195,25 @@ class Routes extends Component {
   checkUserStatus = () => {
     fire.auth().onAuthStateChanged(user => {
       if (user) {
+
         this.setState({
+          userPic: user.photoURL,
           userID: user.uid,
           isAuth: true
         });
 
-        console.log("Already Logged in ===> ***");
+        // console.log("Logged in ===> ***");
         var ref = fire.database().ref(`Users/${user.uid}`);
         ref.once("value").then(snapshot => {
           var alreadyExist = snapshot.exists();
           if (alreadyExist) {
             this.getMyData();
-            console.log("***alreadyExist***", alreadyExist);
+            // console.log("***gettingDATA***", alreadyExist);
             this.setState({
               isSave: true
             });
           } else {
-            console.log("***notExist***", alreadyExist);
+            // console.log("***notExist***", alreadyExist);
 
             this.setState({
               isSave: false
@@ -204,7 +221,7 @@ class Routes extends Component {
           }
         });
       } else {
-        console.log("Not Logged in ===> ***");
+        // console.log("Not Logged in ===> ***");
         this.setState({
           isAuth: false
         });
