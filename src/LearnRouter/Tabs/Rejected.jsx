@@ -1,9 +1,11 @@
 import React from "react";
-import { Card, Box, ListItem, Button, Heading } from "grommet";
+import { Card, Box, ListItem } from "grommet";
+import moment from "moment";
 
 const Rejected = props => {
-  console.log("idNikal", props.val);
-
+  let end = moment(props.val.date);
+  let now = moment();
+  let final = end.from(now);
   return (
     <ListItem>
       <Box
@@ -26,7 +28,7 @@ const Rejected = props => {
               float: "left"
             }}
           >
-            <img src={props.val.myOBJ.imgLinks[0]} />
+            <img alt="" src={props.val.myOBJ.imgLinks[0]} />
           </div>
           <div
             style={{
@@ -39,16 +41,15 @@ const Rejected = props => {
               float: "right"
             }}
           >
-            <img src={props.val.hisOBJ.imgLinks[0]} />
+            <img alt="" src={props.val.hisOBJ.imgLinks[0]} />
           </div>
         </span>
       </Box>
       <Card
-        label={<p style={{ fontSize: 18 }}>Meeting Date {props.val.date}</p>}
+        label={<p style={{ fontSize: 18 }}>Meeting {final}</p>}
         description={
           <p style={{ fontSize: 24 }}>
-            {props.val.textForMe} to meet you at{" "}
-            <b>{props.val.venueOBJ.venue}</b>.
+            {props.val.textForMe} <b>{props.val.venueOBJ.venue}</b>.
           </p>
         }
       />

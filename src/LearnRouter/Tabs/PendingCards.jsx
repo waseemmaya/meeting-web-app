@@ -1,8 +1,11 @@
 import React from "react";
 import { Card, Box, ListItem } from "grommet";
+import moment from "moment";
 
 const PendingCards = props => {
-  console.log("pendindPropsOBJ", props.val);
+  let end = moment(props.val.date);
+  let now = moment();
+  let final = end.from(now);
 
   return (
     <ListItem>
@@ -26,7 +29,7 @@ const PendingCards = props => {
               float: "left"
             }}
           >
-            <img src={props.val.myOBJ.imgLinks[0]} />
+            <img alt="asd" src={props.val.myOBJ.imgLinks[0]} />
           </div>
           <div
             style={{
@@ -39,12 +42,12 @@ const PendingCards = props => {
               float: "right"
             }}
           >
-            <img src={props.val.hisOBJ.imgLinks[0]} />
+            <img alt="asd" src={props.val.hisOBJ.imgLinks[0]} />
           </div>
         </span>
       </Box>
       <Card
-        label={<p style={{ fontSize: 18 }}>Meeting Date {props.val.date}</p>}
+        label={<p style={{ fontSize: 18 }}>Meeting {final}</p>}
         description={
           <p style={{ fontSize: 24 }}>
             You have requested <b>{props.val.hisOBJ.nickName}</b> to meet you at{" "}

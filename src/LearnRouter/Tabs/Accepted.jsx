@@ -1,10 +1,9 @@
 import React from "react";
-import { Card, Box, ListItem, Button, Heading } from "grommet";
+import { Card, Box, ListItem } from "grommet";
 import AddToCalendar from "react-add-to-calendar";
-import Calendar from "grommet/components/icons/base/Calendar";
+import moment from "moment";
 
 const Accepted = props => {
-  console.log("idNikal", props.val);
   const event = {
     title: `${props.val.calendarText}`,
     description: `I have set a meeting with ${props.val.myOBJ.nickName} at ${
@@ -14,6 +13,10 @@ const Accepted = props => {
     startTime: `${props.val.date}`,
     endTime: "2016-09-16T21:45:00-04:00"
   };
+
+  let end = moment(props.val.date);
+  let now = moment();
+  let final = end.from(now);
 
   return (
     <ListItem>
@@ -37,7 +40,7 @@ const Accepted = props => {
               float: "left"
             }}
           >
-            <img src={props.val.myOBJ.imgLinks[0]} />
+            <img alt='' src={props.val.myOBJ.imgLinks[0]} />
           </div>
           <div
             style={{
@@ -50,16 +53,15 @@ const Accepted = props => {
               float: "right"
             }}
           >
-            <img src={props.val.hisOBJ.imgLinks[0]} />
+            <img alt='' src={props.val.hisOBJ.imgLinks[0]} />
           </div>
         </span>
       </Box>
       <Card
-        label={<p style={{ fontSize: 18 }}>Meeting Date {props.val.date}</p>}
+        label={<p style={{ fontSize: 18 }}>Meeting {final}</p>}
         description={
           <p style={{ fontSize: 24 }}>
-            {props.val.textForMe}{" "}
-            <b>{props.val.venueOBJ.venue}</b>.
+            {props.val.textForMe} <b>{props.val.venueOBJ.venue}</b>.
           </p>
         }
       />

@@ -1,18 +1,16 @@
 import React, { Component } from "react";
-import { Box, Heading, Tabs, Tab, Paragraph, List } from "grommet";
-
+import { Box, Heading, Tabs, Tab, List } from "grommet";
 import Spinning from "grommet/components/icons/Spinning";
-
 import Add from "grommet/components/icons/base/Add";
 import Pulse from "grommet/components/icons/Pulse";
 import fire from "../MeetApp/config/fire";
 import PendingCards from "./Tabs/PendingCards";
 import RequestCards from "./Tabs/RequestCards";
-// import IRejectedHim from "./Tabs/IRejectedHim";
-// import HeRejectedMe from "./Tabs/HeRejectedMe";
 import Accepted from "./Tabs/Accepted";
 import Rejected from "./Tabs/Rejected";
-// import Accepted2 from "./Tabs/Accepted2";
+import Done from "./Tabs/Done";
+
+import moment from "moment";
 
 class Dashboard extends Component {
   constructor(props) {
@@ -22,10 +20,8 @@ class Dashboard extends Component {
       myProposalsArr: [],
       hisProposalsArr: [],
       acceptedArr: [],
-      rejectedArr: []
-      // iRejectedHimArr: [],
-      // heRejectedMeArr: [],
-      // acceptedArr2: []
+      rejectedArr: [],
+      doneArr: []
     };
   }
   render() {
@@ -40,6 +36,7 @@ class Dashboard extends Component {
           colorIndex="light-1"
         >
           <h3>Add New Meeting</h3>
+
           <Pulse icon={<Add />} onClick={this.navUserCards} />
         </Box>
         {this.renderTabs()}
@@ -56,7 +53,8 @@ class Dashboard extends Component {
       myProposalsArr,
       hisProposalsArr,
       acceptedArr,
-      rejectedArr
+      rejectedArr,
+      doneArr
     } = this.state;
 
     return (
@@ -199,6 +197,46 @@ class Dashboard extends Component {
             )}
           </Box>
         </Tab>
+        <Tab
+          title={
+            <span>
+              <b>{doneArr.length} </b>
+              Done
+            </span>
+          }
+        >
+          <Box
+            justify="start"
+            align="center"
+            wrap={true}
+            pad="small"
+            margin="small"
+            colorIndex="light-1"
+          >
+            <Heading>Done</Heading>
+            {doneArr.length > 0 ? (
+              <List>
+                {doneArr.map((val, i) => {
+                  return (
+                    <Done
+                      key={val.myOBJ.userID + i}
+                      userID={this.state.userID}
+                      rerenderDoneYes={this.rerenderDoneYes}
+                      rerenderDoneNo={this.rerenderDoneNo}
+                      i={i}
+                      val={val}
+                    />
+                  );
+                })}
+              </List>
+            ) : (
+              <span>
+                <h2>No Data Found</h2>
+                <Spinning size="xlarge" />
+              </span>
+            )}
+          </Box>
+        </Tab>
       </Tabs>
     );
   };
@@ -208,9 +246,30 @@ class Dashboard extends Component {
     this.getMyProposal();
     this.getAcceptedForBoth();
     this.getRejectedForBoth();
-    // this.getWhoAcceptedMe();
-    // this.getWhomIAccepted();
+    this.getDoneMeeting();
   }
+
+  rerenderDoneYes = (i, hisIsMet) => {
+    var { doneArr } = this.state;
+    doneArr[i].isMet = true;
+    doneArr[i].isUpdateMeetingStatus = true;
+    doneArr[i].hisIsMet = hisIsMet;
+
+    this.setState({
+      doneArr
+    });
+  };
+
+  rerenderDoneNo = (i, hisIsMet) => {
+    var { doneArr } = this.state;
+    doneArr[i].isMet = false;
+    doneArr[i].isUpdateMeetingStatus = true;
+    doneArr[i].hisIsMet = hisIsMet;
+
+    this.setState({
+      doneArr
+    });
+  };
 
   acceptMeeting = (
     myName,
@@ -219,7 +278,6 @@ class Dashboard extends Component {
     hisUID,
     meetingOBJ,
     meetingDeleteID,
-    acceptedArr,
     arrayID
   ) => {
     let hisID = hisUID;
@@ -326,9 +384,59 @@ class Dashboard extends Component {
     const { userID, acceptedArr } = this.state;
     let meetings = fire.database().ref(`AllMeetings/${userID}/AcceptedMeeting`);
     meetings.on("child_added", snap => {
-      acceptedArr.push({ ...snap.val() });
-      this.setState({
-        acceptedArr
+      meetings.once("value").then(snapshot => {
+        var a = snapshot.numChildren();
+        for (let i = 0; i < a; i++) {
+          let meetingTime = snap.val().date;
+          // let diffTime = moment(meetingTime).fromNow();
+          var now = moment();
+          let diff = now.diff(meetingTime);
+          if (diff > 0) {
+            this.delAndPush(snap.val());
+          } else {
+            acceptedArr.push({ ...snap.val() });
+            this.setState({
+              acceptedArr
+            });
+          }
+        }
+      });
+    });
+  };
+
+  delAndPush = getOBJ => {
+    let hisID = getOBJ.myOBJ.userID;
+    let hisName = getOBJ.myOBJ.nickName;
+    let myID = getOBJ.hisOBJ.userID;
+    let myName = getOBJ.hisOBJ.nickName;
+
+    let meetID = getOBJ.meetingID;
+
+    let hisDoneRef = fire
+      .database()
+      .ref(`AllMeetings/${hisID}/DoneMeeting/${meetID}`);
+    let myDoneRef = fire
+      .database()
+      .ref(`AllMeetings/${myID}/DoneMeeting/${meetID}`);
+
+    let hisMeetingRef = fire
+      .database()
+      .ref(`AllMeetings/${myID}/AcceptedMeeting/${meetID}`);
+    let myMeetingRef = fire
+      .database()
+      .ref(`AllMeetings/${hisID}/AcceptedMeeting/${meetID}`);
+
+    hisMeetingRef.set(null).then(() => {
+      console.log("hisDelete");
+      getOBJ.doneTextForMe = `Was the meeting successful with ${myName} `;
+      getOBJ.isMet = false;
+
+      hisDoneRef.set(getOBJ);
+      myMeetingRef.set(null).then(() => {
+        getOBJ.isMet = false;
+        getOBJ.doneTextForMe = `Was the meeting successful with ${hisName} `;
+        myDoneRef.set(getOBJ);
+        console.log("myDelete");
       });
     });
   };
@@ -344,10 +452,24 @@ class Dashboard extends Component {
     });
   };
 
+  getDoneMeeting = () => {
+    const { userID, doneArr } = this.state;
+    let meetings = fire.database().ref(`AllMeetings/${userID}/DoneMeeting`);
+    meetings.on("child_added", snap => {
+      doneArr.push({ ...snap.val() });
+      this.setState({
+        doneArr
+      });
+    });
+  };
+
   getHisProposal = () => {
     const { userID, hisProposalsArr } = this.state;
+    console.log("length===>", hisProposalsArr.length);
+
     let meetings = fire.database().ref(`AllMeetings/${userID}/HeRequestToMe`);
     meetings.on("child_added", snap => {
+      // console.log("snap==>", snap.val());
       hisProposalsArr.push({ ...snap.val() });
       this.setState({
         hisProposalsArr

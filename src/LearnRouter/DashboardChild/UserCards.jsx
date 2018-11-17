@@ -42,6 +42,8 @@ class UserCards extends Component {
                 wrap={false}
                 colorIndex="light-1"
               >
+                <h2>Total {this.state.userArr.length} Users Available</h2>
+
                 <Box
                   justify="start"
                   align="center"

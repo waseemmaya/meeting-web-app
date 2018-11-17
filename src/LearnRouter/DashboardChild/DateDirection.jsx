@@ -6,6 +6,7 @@ import Location from "grommet/components/icons/base/Location";
 import Add from "grommet/components/icons/base/Add";
 import Pulse from "grommet/components/icons/Pulse";
 import fire from "../../MeetApp/config/fire";
+import moment from "moment";
 
 import { Form, FormField, DateTime, Button, Value, Timestamp } from "grommet";
 import {
@@ -40,7 +41,12 @@ class DateDirection extends Component {
           <Box justify="start" align="center" colorIndex="light-1">
             {/* <h1>Date</h1> */}
             {/* <p>{this.state.date}</p> */}
-            {this.state.date.length > 1 && <Timestamp value={this.state.date} fields={['date', 'time', 'seconds']} />}
+            {this.state.date.length > 1 && (
+              <Timestamp
+                value={this.state.date}
+                fields={["date", "time", "seconds"]}
+              />
+            )}
           </Box>
         </div>
         {this.state.showDate && this.renderDate()}
@@ -63,6 +69,8 @@ class DateDirection extends Component {
       date,
       status: "Pending",
       isMet: false,
+      isUpdateMeetingStatus: false,
+      isRated: false,
       isCancel: false,
       isAccepted: false
     };
@@ -76,6 +84,8 @@ class DateDirection extends Component {
       date,
       status: "Pending",
       isMet: false,
+      isUpdateMeetingStatus: false,
+      isRated: false,
       isCancel: false,
       isAccepted: false
     };
@@ -129,6 +139,10 @@ class DateDirection extends Component {
     this.setState({
       date: e
     });
+    var end = moment(e);
+    var now = moment();
+    let final = end.from(now);
+    console.log("Final Date ===> ", final);
   };
 
   renderDirection = () => {

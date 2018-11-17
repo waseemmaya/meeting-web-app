@@ -195,7 +195,6 @@ class Routes extends Component {
   checkUserStatus = () => {
     fire.auth().onAuthStateChanged(user => {
       if (user) {
-
         this.setState({
           userPic: user.photoURL,
           userID: user.uid,
